@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسار الإتقان - إدارة الورشة</title>
+    <!-- manifest لجعل التطبيق قابل للتثبيت -->
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #d4af37; /* ذهبي ملكي */
+            --dark: #1a1a1a;
+            --light: #f4f4f4;
+            --accent: #2c3e50;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--dark); color: white; margin: 0; overflow-x: hidden; }
+        
+        /* Splash Screen */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .logo-text { font-size: 2.5rem; color: var(--primary); font-weight: bold; letter-spacing: 2px; }
+        .loader { width: 50px; height: 5px; background: #333; margin-top: 20px; position: relative; overflow: hidden; }
+        .loader::after { content: ''; position: absolute; width: 40%; height: 100%; background: var(--primary); animation: load 1.5s infinite; }
+        @keyframes load { 0% { left: -40%; } 100% { left: 100%; } }
+
+        /* الأقسام الرئيسية */
+        .page { display: none; padding: 20px; animation: fadeIn 0.5s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* كروت الأقسام */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .card { background: var(--accent); padding: 20px; border-radius: 15px; border-bottom: 3px solid var(--primary); text-align: center; cursor: pointer; transition: 0.3s; }
+        .card:active { transform: scale(0.95); }
+
+        /* مجسم السيارة التفاعلي (مبسط) */
+        .car-diagram { position: relative; width: 100%; max-width: 400px; margin: auto; }
+        .car-part { fill: #444; stroke: var(--primary); cursor: pointer; }
+        .car-part.selected { fill: var(--primary); }
+
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; }
+        button { background: var(--primary); color: black; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="logo-text">مسار الإتقان</div>
+        <div class="loader"></div>
+    </div>
+
+    <!-- تسجيل الدخول -->
+    <div id="loginPage" class="page active">
+        <h2 style="text-align: center;">تسجيل الدخول</h2>
+        <input type="text" id="username" placeholder="اسم المستخدم">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button onclick="login()">دخول</button>
+    </div>
+
+    <!-- القائمة الرئيسية -->
+    <div id="mainMenu" class="page">
+        <h3>مرحباً بك في مسار الإتقان</h3>
+        <div class="grid-container">
+            <div class="card" onclick="showPage('newClient')">➕ تسجيل عميل</div>
+            <div class="card" onclick="showPage('reports')">📊 التقارير الشهرية</div>
+        </div>
+        <div id="clientList" style="margin-top: 20px;">
+            <!-- قائمة العملاء الحاليين هنا -->
+        </div>
+    </div>
+
+    <!-- نموذج تسجيل العميل -->
+    <div id="newClient" class="page">
+        <h3>بيانات العميل والسيارة</h3>
+        <input type="text" placeholder="اسم العميل">
+        <input type="text" placeholder="نوع السيارة">
+        <input type="text" placeholder="الموديل">
+        <input type="text" placeholder="رقم اللوحة">
+        <input type="tel" placeholder="رقم الجوال">
+        <label>تاريخ الاستلام</label>
+        <input type="date">
+        <label>تاريخ التسليم المتوقع</label>
+        <input type="date">
+        
+        <h4>اختر الخدمة:</h4>
+        <div class="grid-container">
+            <div class="card" onclick="openSection('paint')">🎨 بوية وسمكرة</div>
+            <div class="card" onclick="openSection('polish')">✨ تلميع</div>
+            <div class="card" onclick="openSection('upholstery')">💺 تنجيد</div>
+        </div>
+        <button onclick="saveClient()" style="margin-top: 20px;">حفظ وطباعة الفاتورة PDF</button>
+    </div>
+
+    <script>
+        // إخفاء الـ Splash Screen بعد 3 ثواني
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+        }, 3000);
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function login() {
+            // منطق تسجيل دخول مبسط
+            showPage('mainMenu');
+        }
+
+        // ملاحظة: لإنشاء PDF نستخدم مكتبة jsPDF
+        // لتشغيل الأوفلاين نحتاج ملف sw.js (Service Worker)
+    </script>
+</body>
+</html>
+// تسجيل الـ Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('تم تفعيل نظام الأوفلاين بنجاح'))
+            .catch(err => console.log('هناك خطأ في تفعيل الأوفلاين', err));
+    });
+}
+
+// نظام تخزين البيانات محلياً (IndexedDB)
+let db;
+let request = indexedDB.open("WorkshopDB", 1);
+
+request.onupgradeneeded = function(e) {
+    db = e.target.result;
+    db.createObjectStore("clients", { keyPath: "id", autoIncrement: true });
+    console.log("تم إنشاء قاعدة البيانات المحلية");
+};
+
+request.onsuccess = function(e) {
+    db = e.target.result;
+};
+
+// وظيفة حفظ بيانات العميل أوفلاين
+function saveClientLocally(clientData) {
+    let transaction = db.transaction(["clients"], "readwrite");
+    let store = transaction.objectStore("clients");
+    store.add(clientData);
+    alert("تم حفظ بيانات العميل في ذاكرة الجهاز (أوفلاين)");
+}
